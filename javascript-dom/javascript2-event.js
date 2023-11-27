@@ -212,9 +212,11 @@ window.addEventListener("load", function(){
     box.style.top = e.y + "px";
     스크롤바에 따라 박스의 위치가 달라진다.
     */
+    var left = container.offsetLeft;
+    var top = container.offsetTop;
     box.style.position = "absolute";
-    box.style.left = e.pageX + "px";
-    box.style.top = e.pageY + "px";
+    box.style.left = e.pageX - left + "px";
+    box.style.top = e.pageY - top + "px";
   };
 
 });
@@ -239,12 +241,14 @@ window.addEventListener("load", function(){
     dragging = false;
   };
   //onmousemove 마우스가 움직일때마다 따라다님
+  var left = container.offsetLeft;
+  var top = container.offsetTop;
   container.onmousemove = function(e){
     // box.style.position = "absolute"; css로 이동
     if(!dragging) //드래그가 아닌 상태면 건너뛴다.
       return;
-    box.style.left = e.pageX-offset.x + "px";
-    box.style.top = e.pageY-offset.y + "px";
+    box.style.left = e.pageX-offset.x - left + "px";
+    box.style.top = e.pageY-offset.y - top + "px";
   };
 
   /* 이걸 안하면 box에서 onmousedown (마우스가 눌리면)
@@ -264,11 +268,12 @@ window.addEventListener("load", function(){
 window.addEventListener("load", function(){
   var section = document.querySelector("#section9");
   var container = section.querySelector(".container");
-  var box = section.querySelector(".box");
   
   var dragging = false;
   var offset = {x:0, y:0};
   var current = null;
+  var left = container.offsetLeft;
+  var top = container.offsetTop;
 
   container.onmousedown = function(e){
     if(e.target.classList.contains("box")){ //클릭된 것이 box라는 명칭이 포함된 노드인지
@@ -284,8 +289,8 @@ window.addEventListener("load", function(){
   container.onmousemove = function(e){
     if(!dragging) return;
 
-  current.style.left = e.pageX-offset.x + "px"; //이동할 대상이 box가 아니라
-  current.style.top = e.pageY-offset.y + "px";  //현재 선택된 current가 되는것이다.
+  current.style.left = e.pageX-offset.x - left + "px"; //이동할 대상이 box가 아니라
+  current.style.top = e.pageY-offset.y - top + "px";  //현재 선택된 current가 되는것이다.
   };
 
   container.onmouseup = function(e){
@@ -293,4 +298,76 @@ window.addEventListener("load", function(){
   };
   
 });
+//Ex 10-마우스 이벤트 객체: 박스의 옵셋 좌표 이용하기
+window.addEventListener("load", function(){
+  var section = document.querySelector("#section10");
+  var container = section.querySelector(".container");
+  var status = section.querySelector(".status");
+  var dragging = false;
+  var offset = {x:0, y:0};
+  var current = null;
+  var left = container.offsetLeft;
+  var top = container.offsetTop;
+  /* 페이지가 로드됐을 때 container의 위치 
+  문서의 꼭지점으로부터 얼마만큼의 위치에 있는지 알아낼 수 있다.*/
+  console.log(left);
+  console.log(top);
 
+  section.onmousedown = function(e){
+    if(e.target.classList.contains("box")){ 
+      dragging = true;
+      current = e.target; 
+      offset.x = e.offsetX; 
+      offset.y = e.offsetY;
+    }
+  };
+  
+  section.onmousemove = function(e){
+    if(!dragging) return;
+
+    /* 좌표를 알아보기 위해 변수에 넣고 status에 text넣어보기
+    var x = e.pageX-offset.x + "px"; 
+    var y = e.pageY-offset.y + "px"; page기반의 좌표를 기반으로 보정을 해줬는데
+    cnotainer를 기준으로 offsetX,Y가 필요하다.
+    var x = e.offsetX-offset.x + "px"; 
+    var y = e.offsetY-offset.y + "px";
+    이렇게 하면 container를 기준으로 한 offset좌표가
+    페이지를 기반으로 나타나기 때문에 box가 위에서 나타난다.
+    offset좌표가 container를 기반으로 되도록 하려면
+    box의 부모인 container의 포지션을 상대좌표영역position: relative;을 해주어야
+    box에서 top:10을 했을 때, container안에서 top:10px이 되는것이다.
+    하지만 또 다른 문제가 발생한다. box가 깜빡깜빡거린다.
+    드래그할 때 onmousemove가 2번 실행되기 때문이다.
+    box에 대한 좌표값이 전달되면서 e.offsetX값을 구하는 것이 실행되고 버블링된다.
+    box에 offset이 발생된것이지 container에서 발생 된 것이 아니기때문에
+    container에도 mousemove이벤트가 발생하지만 offset이 발생하지 않았기때문에 (0, 0)이 전달된다.
+    그래서 박스가 왔다갔다 하는 것이 깜빡거리는 것으로 보인다.
+    if문으로 이벤트를 발생시킨 target이 box일 경우만으로 조건처리를 하거나
+    이벤트 버블링을 막을 수도 있지만 또다른 문제를 발생시킨다.
+    그냥 페이지 좌표를 쓰고 box의 위치가 container의 (0,0)이 될수 있도록
+    container가 갖고있는 x좌표와 y좌표를 얻어서 빼준다.
+    */
+    var x = e.pageX-offset.x-left + "px"; 
+    var y = e.pageY-offset.y-top + "px";
+    current.style.left = x; 
+    current.style.top = y;  
+    status.innerHTML = `(x,y):(${x},${y})`;
+    /* 드래그를 해서 유지를 해야하는 프로그램을 만들 경우에 
+    페이지 전체에 대한 위치를 다루는 것은 바람직하지 않다.
+    container를 기준으로 box가 좌표를 갖게 되면 페이지가 어떻게 변하든 상관없다.
+    page기반의 위치좌표가 아닌 container를 기준으로 좌표를 만들어야한다.*/
+    
+    /*container 밖으로 드래그 되는것
+    css에서 overflow: hidden; 영역을 벗어나면 자식 아이템을 숨기는 기능을 쓴다.
+    하지만 영역 밖에서 mouseup 되었을때 다시 영역안으로 들어오면
+    mouseup을 인식하지 못했기때문에 mousemove상태가 유지된다.
+    이것을 해결하기위해 이벤트들을 container가 아닌 document에 발생시킨다.
+    이벤트 영역의 부모를 넓혀서 이벤트를 발생시키도록 하면 해결된다. (section에도 가능)
+    */
+  };
+
+  section.onmouseup = function(e){
+    dragging = false;
+  };
+  
+});
