@@ -1,6 +1,6 @@
-//stack=LIFO(Last in First Out)
+//-------------------------------------------------Stack=LIFO(Last in First Out)
 class Stack {
-    constructor(){
+    constructor() {
         this.arr = [];
     }
 
@@ -8,16 +8,16 @@ class Stack {
         this.arr.push(data);
     }
     pop(index) {
-        if(index==this.arr.length-1) { //index가 마지막 번째일때
+        if (index == this.arr.length - 1) { //index가 마지막 번째일때
             return this.arr.pop();     //일반적인 pop 기능 수행
         }/* 그렇지않다면 index의 값을 꺼내준다. */
         let result = this.arr.splice(index, 1);
         return result;
     }
     empty() {
-        if(this.arr.length == 0) { //비어있으면 true, 아니면 false
+        if (this.arr.length == 0) { //비어있으면 true, 아니면 false
             return true;
-        }else {
+        } else {
             return false;
         }
     }
@@ -44,27 +44,99 @@ console.log(popValue); //반환값 [30]
 console.log(s.top()); //300
 console.log(s.bottom()); //10
 
-//queue=FIFO(First In First Out)
+//-------------------------------------------------Queue=FIFO(First In First Out)
 class Queue {
     constructor() {
-        this.arr=[];
+        this.store = {};
+        this.front = 0; // 첫 번째 데이터를 가리키는 포인터
+        this.rear = 0; // 마지막 데이터를 가리키는 포인터
     }
-
-    push(data){
-        this.arr.push(data);
+    size() {
+        if (this.store[this.rear] === undefined) {
+            return 0;
+        } else {
+            return this.rear - this.front + 1;
+        }
     }
-    pop(){
-        return this.arr.shift(); 
-        //shift:배열의 첫 번째 요소를 제거하고 해당 요소를 반환
+    push(value) {
+        // 큐에 데이터가 존재하지 않을 경우
+        if (this.size() === 0) {
+            this.store['0'] = value;
+            // 큐에 데이터가 존재할 경우
+        } else {
+            this.rear += 1;
+            this.store[this.rear] = value;
+        }
+    }
+    popleft() {
+        let temp;
+        // 큐에 데이터가 1개 존재하거나 데이터가 없는 경우
+        if (this.front === this.rear) {
+            temp = this.store[this.front];
+            delete this.store[this.front];
+            this.front = 0; // 초기화 이유
+            this.rear = 0;  // pop 후에도 front, rear의 값이 남아있음
+            return temp;
+            // 그 외의 경우
+        } else {
+            temp = this.store[this.front];
+            delete this.store[this.front];
+            this.front += 1;
+            return temp;
+        }
+    }
+}
+let q = new Queue();
+q.push(10);
+q.push(20);
+q.push(30);
+q.push(40);
+q.popleft();
+for (let i in q.store) {
+    for (let i in q.store) {
+        console.log(q.store[i]);
     }
 }
 
-let q = new Queue();
-q.push(1);
-q.push(2);
-q.push(3);
-console.log(q);
-let resut = q.pop();
-console.log(resut); //1
-console.log(q); //[2,3]
 
+//-------------------------------------------------Map
+let map = new Map();
+// map.set("과일", []);
+// map.get('과일').push(["banana"]);
+// map.get('과일').push(["apple"]);
+
+// map.set("과일", {"빨간색": []});
+// map.get("과일")["빨간색"].push("apple");
+// map.get("과일")["빨간색"].push("strawberry");
+// map.get("과일")["빨간색"].push("cherry");
+// console.log(map);
+
+map.set("key", "value");
+console.log(map);
+
+
+//-------------------------------------------------Array Destructuring
+{let line = "1 2";
+const [a, b] = line.split(' ');
+console.log(a, b);
+
+//문자열 -> 배열
+let str = "aaaaa"
+let arr = [...str];
+console.log(arr); // ['a', 'a', 'a', 'a', 'a']
+
+//배열 -> 문자열
+let arr2 = ['a', 'a', 'a', 'a', 'a'];
+console.log(...arr2); // aaaaa
+
+//배열 -> 문자열
+let [c, d, e, f, g] = arr2;
+console.log(c, d, e, f, g); // aaaaa
+}
+
+//-------------------------------------------------join
+const arr = ['딸기', '바나나', '사과'];
+console.log(arr);
+console.log(arr.join()); // 딸기,바나나,사과
+console.log(arr.join('')); // 딸기바나나사과
+console.log(arr.join('-')); // 딸기-바나나-사과
